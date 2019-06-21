@@ -3,11 +3,6 @@ package com.example.ebayweatherapp.viewModel
 import com.example.ebayweatherapp.R
 import com.example.ebayweatherapp.retrofit.response.WeatherResponse
 import io.reactivex.Observable
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.format.DateTimeFormatter
-import java.util.*
 
 class SummaryViewModel(
     private val stream: Observable<WeatherResponse>
@@ -52,15 +47,19 @@ class SummaryViewModel(
             .map {
                 // convert from kelvin to celsius
                 val cTemp = it.main.temp - 272.15
-                "$cTemp 'C"
+                val displayCTemp = String.format("%.1f", cTemp)
+                "$displayCTemp°C"
             }.onErrorReturnItem("")
     }
 
     fun getHumidity(): Observable<String> {
-        return stream.map { "${it.main.humidity} %" }.onErrorReturnItem("")
+        return stream.map { "${it.main.humidity}%" }.onErrorReturnItem("")
     }
 
     fun getVisibility(): Observable<String> {
-        return stream.map { it.visibility.toString() }.onErrorReturnItem("")
+        return stream.map {
+            val displayValue = it.visibility?.div(1000) ?: "--"
+            "${displayValue}k"
+        }.onErrorReturnItem("")
     }
 }

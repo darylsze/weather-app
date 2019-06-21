@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         tools:background="#F1CC85"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/clWeatherContainer"
-        xmlns:android="http://schemas.android.com/apk/res/android"
         >
 
   <androidx.constraintlayout.widget.ConstraintLayout
@@ -37,10 +37,11 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:id="@+id/clLocationContainer"
             android:layout_width="0dp"
+            android:paddingRight="10dp"
             android:layout_height="wrap_content"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintLeft_toRightOf="@id/imageWeather"
-            app:layout_constraintHorizontal_weight="2"
+            app:layout_constraintHorizontal_weight="3"
             >
 
       <TextView
@@ -81,12 +82,12 @@
             app:layout_constraintTop_toTopOf="parent"
             android:gravity="center_horizontal"
             android:textColor="#fff"
-            android:padding="10dp"
+            android:padding="5dp"
             android:id="@+id/txtTemp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="20"
-            android:textSize="48sp"
+            android:textSize="40sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@+id/txtHumidity"
             app:layout_constraintHorizontal_weight="1"
@@ -96,14 +97,14 @@
             app:layout_constraintTop_toTopOf="parent"
             android:gravity="center_horizontal"
             android:textColor="#fff"
-            android:padding="10dp"
+            android:padding="5dp"
             android:id="@+id/txtHumidity"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="20"
-            android:textSize="48sp"
+            android:textSize="40sp"
             app:layout_constraintLeft_toRightOf="@id/txtTemp"
-            app:layout_constraintRight_toLeftOf="@id/txtFeelTemp"
+            app:layout_constraintRight_toLeftOf="@id/txtVisibility"
             app:layout_constraintHorizontal_weight="1"
             />
 
@@ -111,13 +112,65 @@
             app:layout_constraintTop_toTopOf="parent"
             android:gravity="center_horizontal"
             android:textColor="#fff"
-            android:padding="10dp"
-            android:id="@+id/txtFeelTemp"
+            android:padding="5dp"
+            android:id="@+id/txtVisibility"
             android:layout_width="0dp"
             tools:text="20"
-            android:textSize="48sp"
+            android:textSize="40sp"
             android:layout_height="wrap_content"
             app:layout_constraintLeft_toRightOf="@id/txtHumidity"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintHorizontal_weight="1"
+            />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+          android:id="@+id/clTempLabelContainer"
+          app:layout_constraintTop_toBottomOf="@id/clTempContainer"
+          android:layout_width="match_parent"
+          android:layout_height="0dp"
+          android:paddingBottom="10dp"
+          >
+
+    <TextView
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="center_horizontal"
+            android:textColor="#fff"
+            android:id="@+id/lblTemp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/summary_label_temperature"
+            android:textSize="17sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/lblHumidity"
+            app:layout_constraintHorizontal_weight="1"
+            />
+
+    <TextView
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="center_horizontal"
+            android:textColor="#fff"
+            android:id="@+id/lblHumidity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/summary_label_humidity"
+            android:textSize="17sp"
+            app:layout_constraintLeft_toRightOf="@id/lblTemp"
+            app:layout_constraintRight_toLeftOf="@id/lblVisibility"
+            app:layout_constraintHorizontal_weight="1"
+            />
+
+    <TextView
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="center_horizontal"
+            android:textColor="#fff"
+            android:id="@+id/lblVisibility"
+            android:layout_width="0dp"
+            android:text="@string/summary_label_visibility"
+            android:textSize="17sp"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toRightOf="@id/lblHumidity"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintHorizontal_weight="1"
             />
