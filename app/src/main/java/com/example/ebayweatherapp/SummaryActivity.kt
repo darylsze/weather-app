@@ -20,8 +20,7 @@ class SummaryActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        txtLocation.text = "PARIS, FR"
-        txtDate.text = "Sat Apr 21 2018"
+//        txtDate.text = "Sat Apr 21 2018"
 
         viewModel
             .getWeatherIcon()
@@ -30,8 +29,6 @@ class SummaryActivity : BaseActivity() {
             } addTo compositeDisposable
 
         txtTemp.text = "20 'C"
-        txtHumidity.text = "52%"
-        txtFeelTemp.text = "26 'C"
 
         viewModel
             .getCurrentWeatherByLocation()
@@ -41,9 +38,20 @@ class SummaryActivity : BaseActivity() {
         viewModel.getLocationName()
             .subscribe { txtLocation.text = it } addTo compositeDisposable
 
+
         // country
         viewModel.getCountryName()
             .subscribe { txtCountry.text = it } addTo compositeDisposable
+
+        // feelTemp
+        viewModel.getVisibility()
+            .subscribe { txtFeelTemp.text = it } addTo compositeDisposable
+
+        viewModel.getHumidity()
+            .subscribe { txtHumidity.text = it } addTo compositeDisposable
+
+        viewModel.getTemp()
+            .subscribe { txtTemp.text = it } addTo compositeDisposable
     }
 
 }
