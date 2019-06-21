@@ -1,6 +1,5 @@
 package com.example.ebayweatherapp
 
-import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.disposables.CompositeDisposable
 import org.kodein.di.KodeinAware

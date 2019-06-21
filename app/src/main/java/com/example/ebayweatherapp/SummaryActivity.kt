@@ -2,13 +2,13 @@ package com.example.ebayweatherapp
 
 import android.os.Bundle
 import com.example.ebayweatherapp.extensions.addTo
-import com.example.ebayweatherapp.retrofit.service.WeatherService
+import com.example.ebayweatherapp.retrofit.service.WeatherServiceI
 import com.example.ebayweatherapp.viewModel.SummaryViewModel
 import kotlinx.android.synthetic.main.weather_header.*
 import org.kodein.di.generic.instance
 
 class SummaryActivity : BaseActivity() {
-    private val weatherService: WeatherService by instance()
+    private val weatherService: WeatherServiceI by instance()
 
     private val viewModel by lazy {
         val stream = weatherService.hitCountCheck('')

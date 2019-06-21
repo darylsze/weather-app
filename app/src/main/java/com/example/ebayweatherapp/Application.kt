@@ -1,8 +1,8 @@
 package com.example.ebayweatherapp
 
 import android.app.Application
-import com.example.ebayweatherapp.retrofit.service.WeatherService
-import com.example.ebayweatherapp.retrofit.service.WeatherServiceImpl
+import com.example.ebayweatherapp.retrofit.service.WeatherServiceI
+import com.example.ebayweatherapp.retrofit.service.WeatherServiceImplI
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Interceptor
@@ -48,12 +48,12 @@ class Application : Application(), KodeinAware {
                 .client(instance() as OkHttpClient)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("https://samples.openweathermap.org/data/2.5")
+                .baseUrl("https://api.openweathermap.org/data/2.5")
                 .build()
         }
 
-        bind<WeatherService>() with singleton {
-            WeatherServiceImpl(instance() as Retrofit)
+        bind<WeatherServiceI>() with singleton {
+            WeatherServiceImplI(instance() as Retrofit)
         }
 
         bind<Gson>() with singleton {
