@@ -5,7 +5,7 @@ import io.reactivex.disposables.CompositeDisposable
 import org.kodein.di.KodeinAware
 
 open class BaseActivity: AppCompatActivity(), KodeinAware {
-    final override val kodein by kodein()
+    override val kodein by lazy { (applicationContext as Application).kodein }
     val compositeDisposable = CompositeDisposable()
 
     override fun onPause() {

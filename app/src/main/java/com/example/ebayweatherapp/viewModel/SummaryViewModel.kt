@@ -1,18 +1,42 @@
 package com.example.ebayweatherapp.viewModel
 
-import com.example.ebayweatherapp.retrofit.response.ApiResponse
+import com.example.ebayweatherapp.R
+import com.example.ebayweatherapp.retrofit.response.WeatherResponse
 import io.reactivex.Observable
 
 class SummaryViewModel(
-    private val stream: Observable<ApiResponse.Result>
+    private val stream: Observable<WeatherResponse>
 ) {
     companion object {
-        fun of(stream: Observable<ApiResponse.Result>): SummaryViewModel {
+        fun of(stream: Observable<WeatherResponse>): SummaryViewModel {
             return SummaryViewModel(stream)
         }
     }
 
+    private val weatherIconMapper = mapOf(
+        "Clouds" to R.drawable.cloudy
+    )
+
+    fun getWeatherIcon(): Observable<Int> {
+        return stream
+            .map { response -> response
+                .weather
+                .firstOrNull()
+                ?.main
+                ?.let { name -> weatherIconMapper.getOrElse(name, { R.drawable.sun })} ?: R.drawable.sun }
+            .onErrorReturnItem(0)
+    }
+
     fun getCurrentWeatherByLocation(): Observable<String> {
-        return stream.map { it.query }.map { it.toString() }
+        // FIXME
+        return stream.map { it.toString() }.onErrorReturnItem("")
+    }
+
+    fun getLocationName(): Observable<String> {
+        return stream.map{ it.name }.onErrorReturnItem("")
+    }
+
+    fun getCountryName() : Observable<String> {
+        return stream.map { ", ${it.sys.country}" }.onErrorReturnItem("")
     }
 }

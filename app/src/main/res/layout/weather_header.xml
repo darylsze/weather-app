@@ -46,10 +46,22 @@
       <TextView
               app:layout_constraintTop_toTopOf="parent"
               app:layout_constraintLeft_toLeftOf="parent"
+              app:layout_constraintRight_toLeftOf="@id/txtCountry"
               android:id="@+id/txtLocation"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              tools:text="PARIS, FR"
+              tools:text="America"
+              android:textSize="38sp"
+              android:textColor="#fff"
+              />
+
+      <TextView
+              app:layout_constraintTop_toTopOf="parent"
+              app:layout_constraintLeft_toRightOf="@id/txtLocation"
+              android:id="@+id/txtCountry"
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              tools:text=", FR"
               android:textSize="38sp"
               android:textColor="#fff"
               />

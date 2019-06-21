@@ -2,16 +2,17 @@ package com.example.ebayweatherapp
 
 import android.os.Bundle
 import com.example.ebayweatherapp.extensions.addTo
-import com.example.ebayweatherapp.retrofit.service.WeatherServiceI
+import com.example.ebayweatherapp.retrofit.service.WeatherService
 import com.example.ebayweatherapp.viewModel.SummaryViewModel
+import io.reactivex.functions.Consumer
 import kotlinx.android.synthetic.main.weather_header.*
 import org.kodein.di.generic.instance
 
 class SummaryActivity : BaseActivity() {
-    private val weatherService: WeatherServiceI by instance()
+    private val weatherService: WeatherService by instance()
 
     private val viewModel by lazy {
-        val stream = weatherService.hitCountCheck('')
+        val stream = weatherService.getWeatherByLocation("hong kong")
         SummaryViewModel.of(stream)
     }
 
@@ -21,14 +22,28 @@ class SummaryActivity : BaseActivity() {
 
         txtLocation.text = "PARIS, FR"
         txtDate.text = "Sat Apr 21 2018"
-        imageWeather.setImageResource(R.drawable.cloudy)
+
+        viewModel
+            .getWeatherIcon()
+            .subscribe {
+                imageWeather.setImageResource(it)
+            } addTo compositeDisposable
+
         txtTemp.text = "20 'C"
         txtHumidity.text = "52%"
         txtFeelTemp.text = "26 'C"
 
         viewModel
             .getCurrentWeatherByLocation()
-            .subscribe { txtFeelTemp.text = it } addTo compositeDisposable
+            .subscribe(Consumer { txtFeelTemp.text = it }, Consumer { print("error iin fetching api") }) addTo compositeDisposable
+
+        // location
+        viewModel.getLocationName()
+            .subscribe { txtLocation.text = it } addTo compositeDisposable
+
+        // country
+        viewModel.getCountryName()
+            .subscribe { txtCountry.text = it } addTo compositeDisposable
     }
 
 }
