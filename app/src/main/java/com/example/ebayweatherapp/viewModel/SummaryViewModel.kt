@@ -13,8 +13,13 @@ class SummaryViewModel(
         }
     }
 
+    // https://openweathermap.org/weather-conditions
     private val weatherIconMapper = mapOf(
-        "Clouds" to R.drawable.cloudy
+        "Clouds" to R.drawable.cloudy,
+        "Thunderstorm" to R.drawable.storm,
+        "Drizzle" to R.drawable.rain,
+        "Rain" to R.drawable.rain,
+        "Clear" to R.drawable.sun
     )
 
     fun getWeatherIcon(): Observable<Int> {
@@ -24,7 +29,7 @@ class SummaryViewModel(
                     .weather
                     .firstOrNull()
                     ?.main
-                    ?.let { name -> weatherIconMapper.getOrElse(name, { R.drawable.sun }) } ?: R.drawable.sun
+                    ?.let { name -> weatherIconMapper.getOrElse(name, { R.drawable.na }) } ?: R.drawable.na
             }
             .onErrorReturnItem(0)
     }
