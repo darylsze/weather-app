@@ -1,6 +1,7 @@
 package com.example.ebayweatherapp.viewModel
 
 import android.content.Context
+import androidx.core.view.isVisible
 import com.example.ebayweatherapp.R
 import com.example.ebayweatherapp.SearchHistory
 import com.example.ebayweatherapp.extensions.getSearchHistories
@@ -9,14 +10,20 @@ import com.example.ebayweatherapp.extensions.slientError
 import com.example.ebayweatherapp.retrofit.response.WeatherResponse
 import com.google.gson.Gson
 import io.reactivex.Observable
+import io.reactivex.subjects.BehaviorSubject
+import kotlinx.android.synthetic.main.empty_weather_summary.*
 import org.jetbrains.anko.defaultSharedPreferences
 
 class SummaryViewModel(
-        private val stream: Observable<WeatherResponse>
+        private val apiSignal: Observable<WeatherResponse>,
+        private val searchHistorySignal: Observable<List<SearchHistory>>
 ) {
     companion object {
-        fun of(stream: Observable<WeatherResponse>): SummaryViewModel {
-            return SummaryViewModel(stream)
+        fun of(
+            apiSignal: Observable<WeatherResponse>,
+            searchHistorySignal: BehaviorSubject<List<SearchHistory>>
+        ): SummaryViewModel {
+            return SummaryViewModel(apiSignal, searchHistorySignal)
         }
     }
 
@@ -30,7 +37,7 @@ class SummaryViewModel(
     )
 
     fun getWeatherIcon(): Observable<Int> {
-        return stream
+        return apiSignal
                 .map { response ->
                     response
                             .weather
@@ -44,19 +51,19 @@ class SummaryViewModel(
 
     fun getCurrentWeatherByLocation(): Observable<String> {
         // FIXME
-        return stream.map { it.toString() }.slientError()
+        return apiSignal.map { it.toString() }.slientError()
     }
 
     fun getLocationName(): Observable<String> {
-        return stream.map { it.name }.slientError()
+        return apiSignal.map { it.name }.slientError()
     }
 
     fun getCountryName(): Observable<String> {
-        return stream.map { ", ${it.sys.country}" }.slientError()
+        return apiSignal.map { ", ${it.sys.country}" }.slientError()
     }
 
     fun getTemp(): Observable<String> {
-        return stream
+        return apiSignal
                 .map {
                     // convert from kelvin to celsius
                     val cTemp = it.main.temp - 272.15
@@ -68,13 +75,13 @@ class SummaryViewModel(
     }
 
     fun getHumidity(): Observable<String> {
-        return stream
+        return apiSignal
                 .map { "${it.main.humidity}%" }
                 .slientError()
     }
 
     fun getVisibility(): Observable<String> {
-        return stream
+        return apiSignal
                 .map {
                     val displayValue = it.visibility?.div(1000) ?: "--"
                     "${displayValue}k"
@@ -83,7 +90,9 @@ class SummaryViewModel(
     }
 
     fun isWeatherInformationReady(): Observable<Boolean> {
-        return stream.map { true }
+        return searchHistorySignal
+            .map{ it.isEmpty() }
+            .slientError()
     }
 
     fun getSearchHistories(context: Context, gson: Gson): List<SearchHistory> {

@@ -12,6 +12,7 @@ import com.example.ebayweatherapp.extensions.slientError
 import com.example.ebayweatherapp.retrofit.response.WeatherResponse
 import com.example.ebayweatherapp.retrofit.service.WeatherService
 import com.example.ebayweatherapp.rxbinding.queryChanges
+import com.example.ebayweatherapp.utils.weatherNameToIcon
 import com.example.ebayweatherapp.viewModel.SummaryViewModel
 import com.google.gson.Gson
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
@@ -25,9 +26,9 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 data class SearchHistory(
-        val input: String,
-        val weather: String,
-        val createdAt: Date
+    val input: String,
+    val weather: String,
+    val createdAt: Date
 )
 
 // 1. got error dont resubmit signal
@@ -46,7 +47,6 @@ class SummaryActivity : BaseActivity() {
     // track GPS
     private val gpsSignal = BehaviorSubject.create<Pair<Double, Double>>()
 
-
     private val previousSearchHistory by lazy {
         viewModel.getSearchHistories(this@SummaryActivity, gson)
     }
@@ -57,7 +57,7 @@ class SummaryActivity : BaseActivity() {
 
     private val viewModel by lazy {
         // keep view model change based on API response
-        SummaryViewModel.of(apiSignal)
+        SummaryViewModel.of(apiSignal, searchHistorySignal)
     }
 
 
@@ -71,80 +71,81 @@ class SummaryActivity : BaseActivity() {
         setupRecyclerView()
 
         searchHistorySignal
-            .doOnNext { rvSearchHistoryAdapter.dataset.addAll(it) }
+            .doOnNext { rvSearchHistoryAdapter.setHistories(it) }
             .subscribe()
 
         // cancel any refresh state when no network worker is active
         apiSignal
-                .doOnNext { runOnUiThread { srl.isRefreshing = false } }
-                .doOnNext {
-                    println(it)
-                    val history = SearchHistory(
-                        input = it.name,
-                        weather = it.weather.first().main,
-                        createdAt = Date()
-                    )
-                    val result = viewModel.addSearchHistory(this@SummaryActivity, gson, history)
-                    searchHistorySignal.onNext(result)
-                }
-                .subscribe() addTo compositeDisposable
+            .doOnNext { runOnUiThread { srl.isRefreshing = false } }
+            .doOnNext {
+                println(it)
+                val history = SearchHistory(
+                    input = it.name,
+                    weather = it.weather.first().main,
+                    createdAt = Date()
+                )
+                val result = viewModel.addSearchHistory(this@SummaryActivity, gson, history)
+                searchHistorySignal.onNext(result)
+            }
+            .subscribe() addTo compositeDisposable
 
         // swipe refresh layout
         srl.refreshes()
-                .doOnNext { locationSignal.onNext(locationSignal.value ?: "") }
-                .slientError()
-                .subscribe() addTo compositeDisposable
+            .doOnNext { locationSignal.onNext(locationSignal.value ?: "") }
+            .slientError()
+            .subscribe() addTo compositeDisposable
 
+        // should show empty layout or not
         viewModel
-                .isWeatherInformationReady()
-                .doOnNext { runOnUiThread { lblEmptyWeatherInfo.isVisible = false } }
-                .subscribe() addTo compositeDisposable
+            .isWeatherInformationReady()
+            .doOnNext { runOnUiThread { lblEmptyWeatherInfo.isVisible = false } }
+            .subscribe() addTo compositeDisposable
 
         // subscribe to location signal
         locationSignal
-                .doOnNext { runOnUiThread { srl.isRefreshing = true } }
-                .flatMap { weatherService.getWeatherByLocation(it) }
-                .doOnError(::println) // UI
-                .doOnNext { apiSignal.onNext(it) }
-                .slientError()
-                .subscribe() addTo compositeDisposable
+            .doOnNext { runOnUiThread { srl.isRefreshing = true } }
+            .flatMap { weatherService.getWeatherByLocation(it) }
+            .doOnError(::println) // UI
+            .doOnNext { apiSignal.onNext(it) }
+            .slientError()
+            .subscribe() addTo compositeDisposable
 
         // icon
         viewModel
-                .getWeatherIcon()
-                .subscribe {
-                    imageWeather.setImageResource(it)
-                } addTo compositeDisposable
+            .getWeatherIcon()
+            .subscribe {
+                imageWeather.setImageResource(it)
+            } addTo compositeDisposable
 
         // location
         viewModel.getLocationName()
-                .subscribe { txtLocation.text = it } addTo compositeDisposable
+            .subscribe { txtLocation.text = it } addTo compositeDisposable
 
         // country
         viewModel.getCountryName()
-                .subscribe { txtCountry.text = it } addTo compositeDisposable
+            .subscribe { txtCountry.text = it } addTo compositeDisposable
 
         // visibility
         viewModel.getVisibility()
-                .subscribe { txtVisibility.text = it } addTo compositeDisposable
+            .subscribe { txtVisibility.text = it } addTo compositeDisposable
 
         // humidity
         viewModel.getHumidity()
-                .subscribe { txtHumidity.text = it } addTo compositeDisposable
+            .subscribe { txtHumidity.text = it } addTo compositeDisposable
 
         // temp
         viewModel.getTemp()
-                .subscribe { txtTemp.text = it } addTo compositeDisposable
+            .subscribe { txtTemp.text = it } addTo compositeDisposable
 
         // search view
         searchView.queryChanges()
-                .debounce(2, TimeUnit.SECONDS)
-                .filter {
-                    val (_, newValue) = it
-                    !TextUtils.isEmpty(newValue)
-                }
-                .doOnNext { locationSignal.onNext(it.second) }
-                .subscribe() addTo compositeDisposable
+            .debounce(2, TimeUnit.SECONDS)
+            .filter {
+                val (_, newValue) = it
+                !TextUtils.isEmpty(newValue)
+            }
+            .doOnNext { locationSignal.onNext(it.second) }
+            .subscribe() addTo compositeDisposable
     }
 
     private fun setupRecyclerView() {
@@ -159,18 +160,28 @@ class MyRvSearchResultAdapter(
     val dataset: MutableList<SearchHistory>
 ) : RecyclerView.Adapter<SearchHistoryViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchHistoryViewHolder {
-        val view = (parent.context as BaseActivity).layoutInflater.inflate(R.layout.rv_row_history_weather, parent, false)
+        val view =
+            (parent.context as BaseActivity).layoutInflater.inflate(R.layout.rv_row_history_weather, parent, false)
         return SearchHistoryViewHolder(view)
     }
 
     override fun getItemCount(): Int = dataset.size
 
     override fun onBindViewHolder(holder: SearchHistoryViewHolder, position: Int) {
-        holder.itemView.imageWeather.setImageResource(R.drawable.summer)
+        println(dataset[position])
+        weatherNameToIcon(dataset[position].weather).apply {
+            holder.itemView.imageWeather.setImageResource(this)
+        }
         holder.itemView.lblLocation.text = dataset[position].input
         holder.itemView.lblLastUpdate.text = "abcd"
     }
 
+    fun setHistories(histories: List<SearchHistory>) {
+        dataset.clear()
+        dataset.addAll(0, histories.reversed())
+        this.notifyItemChanged(0)
+    }
+
 }
 
-class SearchHistoryViewHolder(view: View): RecyclerView.ViewHolder(view)
+class SearchHistoryViewHolder(view: View) : RecyclerView.ViewHolder(view)
