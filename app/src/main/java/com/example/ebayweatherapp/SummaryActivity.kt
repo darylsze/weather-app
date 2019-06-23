@@ -4,10 +4,11 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ebayweatherapp.extensions.addTo
+import com.example.ebayweatherapp.extensions.getSearchHistories
 import com.example.ebayweatherapp.extensions.slientError
 import com.example.ebayweatherapp.retrofit.response.WeatherResponse
 import com.example.ebayweatherapp.retrofit.service.WeatherService
@@ -21,18 +22,12 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.empty_weather_summary.*
 import kotlinx.android.synthetic.main.rv_row_history_weather.view.*
 import kotlinx.android.synthetic.main.weather_header.*
+import org.jetbrains.anko.defaultSharedPreferences
+import org.jetbrains.anko.toast
 import org.kodein.di.generic.instance
-import java.util.*
 import java.util.concurrent.TimeUnit
 
-data class SearchHistory(
-    val input: String,
-    val weather: String,
-    val createdAt: Date
-)
-
 // 1. got error dont resubmit signal
-// 2. need check history for initial
 
 class SummaryActivity : BaseActivity() {
     private val weatherService: WeatherService by instance<WeatherService>()
@@ -42,18 +37,17 @@ class SummaryActivity : BaseActivity() {
     private val locationSignal = BehaviorSubject.create<String>()
 
     // track API response
-    private val apiSignal by lazy {
-        BehaviorSubject.create<WeatherResponse>()
-    }
+    private val apiSignal = BehaviorSubject.create<WeatherResponse>()
 
     // track GPS
     private val gpsSignal = BehaviorSubject.create<Pair<Double, Double>>()
 
+    // track search history
+    private val searchHistorySignal = BehaviorSubject.create<List<WeatherResponse>>()
+
     private val previousSearchHistory by lazy {
         viewModel.getSearchHistories(this@SummaryActivity, gson)
     }
-
-    private val searchHistorySignal = BehaviorSubject.create<List<SearchHistory>>()
 
     private val viewModel by lazy {
         // keep view model change based on API response
@@ -63,6 +57,18 @@ class SummaryActivity : BaseActivity() {
 
     private val rvSearchHistoryAdapter by lazy {
         MyRvSearchResultAdapter(mutableListOf())
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        this@SummaryActivity.defaultSharedPreferences
+            .getSearchHistories(gson)
+            .lastOrNull()
+            ?.apply {
+                locationSignal.onNext(this.name)
+                toast("fetching last location: ${this.name}")
+            }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,13 +86,7 @@ class SummaryActivity : BaseActivity() {
         apiSignal
             .doOnNext { runOnUiThread { srl.isRefreshing = false } }
             .doOnNext {
-                println(it)
-                val history = SearchHistory(
-                    input = it.name,
-                    weather = it.weather.first().main,
-                    createdAt = Date()
-                )
-                val result = viewModel.addSearchHistory(this@SummaryActivity, gson, history)
+                val result = viewModel.addSearchHistory(this@SummaryActivity, gson, it)
                 searchHistorySignal.onNext(result)
             }
             .subscribe() addTo compositeDisposable
@@ -100,16 +100,20 @@ class SummaryActivity : BaseActivity() {
         // should show empty layout or not
         viewModel
             .isWeatherInformationReady()
-            .doOnNext { runOnUiThread { lblEmptyWeatherInfo.isVisible = false } }
+            .doOnNext { println("isWeatherInformationReady: $it") }
+            .doOnNext { runOnUiThread { lblEmptyWeatherInfo.isInvisible = it } }
             .subscribe() addTo compositeDisposable
 
         // subscribe to location signal
         locationSignal
-            .doOnNext { runOnUiThread { srl.isRefreshing = true } }
-            .flatMap { weatherService.getWeatherByLocation(it) }
-            .doOnError(::println) // UI
+            .flatMap { weatherService.getWeatherByLocation(it)
+                .doOnError { runOnUiThread { toast("Error in fetching location") } }
+                .doFinally { runOnUiThread { srl.isRefreshing = false } }
+                .doOnSubscribe { runOnUiThread { srl.isRefreshing = true } }
+                .slientError()
+            }
             .doOnNext { apiSignal.onNext(it) }
-            .slientError()
+            .doFinally {   }
             .subscribe() addTo compositeDisposable
 
         // icon
@@ -159,7 +163,7 @@ class SummaryActivity : BaseActivity() {
 }
 
 class MyRvSearchResultAdapter(
-    val dataset: MutableList<SearchHistory>
+    private val dataset: MutableList<WeatherResponse>
 ) : RecyclerView.Adapter<SearchHistoryViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchHistoryViewHolder {
         val view =
@@ -170,18 +174,19 @@ class MyRvSearchResultAdapter(
     override fun getItemCount(): Int = dataset.size - 1
 
     override fun onBindViewHolder(holder: SearchHistoryViewHolder, position: Int) {
-        println(dataset[position])
-        weatherNameToIcon(dataset[position].weather).apply {
+        weatherNameToIcon(dataset[position].weather.first().main).apply {
             holder.itemView.imageWeather.setImageResource(this)
         }
-        holder.itemView.lblLocation.text = dataset[position].input
-        holder.itemView.lblLastUpdate.text = "abcd"
+        holder.itemView.lblLocation.text = dataset[position].name
+        holder.itemView.lblLastUpdate.text = dataset[position].dt.toString() // FIXME to date format
     }
 
-    fun setHistories(histories: List<SearchHistory>) {
+    fun setHistories(histories: List<WeatherResponse>) {
+        if (histories.isEmpty()) return
+
         dataset.clear()
-        dataset.addAll(0, histories.reversed())
-        this.notifyItemChanged(0)
+        dataset.addAll(histories)
+        this.notifyDataSetChanged()
     }
 
 }

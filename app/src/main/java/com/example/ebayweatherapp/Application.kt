@@ -58,9 +58,7 @@ class Application : Application(), KodeinAware {
         }
 
         bind<Gson>() with singleton {
-            GsonBuilder()
-//                .registerTypeAdapter(Instant::class.java, InstantTypeConverter())
-                .setLenient().create()
+            GsonBuilder().setLenient().create()
         }
     }
 
