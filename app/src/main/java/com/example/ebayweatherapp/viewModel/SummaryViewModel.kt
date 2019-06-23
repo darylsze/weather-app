@@ -27,7 +27,6 @@ class SummaryViewModel(
     fun getWeatherIcon(): Observable<Int> {
         return apiSignal
             .switchIfEmpty(searchHistorySignal.map { it.first() })
-            .doOnNext { println("getWeatherIcon result -> $it") }
             .map { it.weather.first().main }
             .map { weatherIconMapper.getOrElse(it, { R.drawable.na }) }
             .slientError()
@@ -36,7 +35,6 @@ class SummaryViewModel(
     fun getLocationName(): Observable<String> {
         return apiSignal
             .switchIfEmpty(searchHistorySignal.map { it.firstOrNull() })
-            .doOnNext { println("in getLocationName -> $it") }
             .map { it.name }
             .slientError()
     }

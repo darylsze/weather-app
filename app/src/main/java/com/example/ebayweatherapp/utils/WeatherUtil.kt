@@ -11,7 +11,6 @@ private val weatherIconMapper = mapOf(
 )
 
 fun weatherNameToIcon(name: String): Int {
-    println(name)
     return weatherIconMapper
         .entries
         .firstOrNull { it.key == name}
