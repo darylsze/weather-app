@@ -2,21 +2,25 @@ package com.example.ebayweatherapp
 
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.arlib.floatingsearchview.FloatingSearchView
 import com.example.ebayweatherapp.extensions.addTo
 import com.example.ebayweatherapp.extensions.getSearchHistories
 import com.example.ebayweatherapp.extensions.slientError
 import com.example.ebayweatherapp.retrofit.response.WeatherResponse
 import com.example.ebayweatherapp.retrofit.service.WeatherService
+import com.example.ebayweatherapp.rxbinding.menuItemChanges
 import com.example.ebayweatherapp.rxbinding.queryChanges
 import com.example.ebayweatherapp.utils.weatherNameToIcon
 import com.example.ebayweatherapp.viewModel.SummaryViewModel
 import com.google.gson.Gson
 import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
+import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.empty_weather_summary.*
@@ -75,6 +79,7 @@ class SummaryActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupRecyclerView()
+        setupSearchView()
 
         searchHistorySignal.onNext(previousSearchHistory)
 
@@ -152,6 +157,16 @@ class SummaryActivity : BaseActivity() {
             }
             .doOnNext { locationSignal.onNext(it.second) }
             .subscribe() addTo compositeDisposable
+    }
+
+    private fun setupSearchView() {
+        searchView.menuItemChanges()
+            .doOnNext {
+                when (it.itemId) {
+                    R.id.gps -> toast("not implemented!")
+                }
+            }
+            .subscribe()
     }
 
     private fun setupRecyclerView() {

@@ -74,8 +74,9 @@
             app:floatingSearch_searchBarMarginLeft="10dp"
             app:floatingSearch_searchBarMarginRight="10dp"
             app:floatingSearch_searchBarMarginTop="10dp"
+            app:floatingSearch_leftActionMode="showSearch"
             app:floatingSearch_searchHint="Search location"
-            app:floatingSearch_showSearchKey="true"
+            app:showAsAction="always"
             app:floatingSearch_suggestionsListAnimDuration="200"
             tools:visibility="visible"/>
 
