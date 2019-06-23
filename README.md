@@ -20,6 +20,13 @@ A demo weather app using RxJava2, AndroidX, Kodein, MVVM and OpenWeatherMap api
 1. RxJava2
 1. RxKotlin
 1. AndroidX (decouple dependency from android support library)
+1. RxBinding (view binding to support Rx)
+
+#### UI libraries:
+1. recyclerview
+1. constraintlayout
+1. floatingsearchview
+1. anko (handy syntactic-sugar for frequently used views, like, toast, dialog, runOnUiThread)
 
 #### Design pattern:
 1. MVVM (pure Rx, not android LifeData)
