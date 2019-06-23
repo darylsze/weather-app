@@ -29,7 +29,7 @@ A demo weather app using RxJava2, AndroidX, Kodein, MVVM and OpenWeatherMap api
 1. anko (handy syntactic-sugar for frequently used views, like, toast, dialog, runOnUiThread)
 
 #### Design pattern:
-1. MVVM (pure Rx, not android LifeData)
+1. MVVM (pure Rx, not android LiveData)
 
 ## Demo (GIF)
 <image width="320" src="https://github.com/darylsze/weather-app/blob/master/demo/ebay-weather-ap.gif" />
