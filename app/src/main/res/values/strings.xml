@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">EbayWeatherApp</string>
+  <string name="summary_label_temperature">Temperature</string>
+  <string name="summary_label_humidity">Humidity</string>
+  <string name="summary_label_visibility">Visibility</string>
 </resources>
