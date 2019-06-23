@@ -105,7 +105,6 @@ class SummaryActivity : BaseActivity() {
         // should show empty layout or not
         viewModel
             .isWeatherInformationReady()
-            .doOnNext { println("isWeatherInformationReady: $it") }
             .doOnNext { runOnUiThread { lblEmptyWeatherInfo.isInvisible = it } }
             .subscribe() addTo compositeDisposable
 
