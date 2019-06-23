@@ -23,6 +23,23 @@ class SummaryViewModelTest {
             .subscribe(testObserver)
 
         testObserver.assertValue(weatherNameToIcon("Clouds"))
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun getWeatherIconWhenApiNotReadyButHistoryReady() {
+        val testObserver = TestObserver<Int>()
+        val apiSignal = Observable.empty<WeatherResponse>()
+        val searchHistorySignal = Observable.just(listOf(fakeWeatherResponse))
+
+        SummaryViewModel(apiSignal, searchHistorySignal)
+            .getWeatherIcon()
+            .subscribe(testObserver)
+
+        testObserver.assertValue(weatherNameToIcon("Clouds"))
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
     }
 
     @Test
@@ -36,6 +53,22 @@ class SummaryViewModelTest {
             .subscribe(testObserver)
 
         testObserver.assertValue("Hong Kong")
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun getLocationNameWhenApiNotReadyButHistoryReady() {
+        val testObserver = TestObserver<String>()
+        val apiSignal = Observable.empty<WeatherResponse>()
+        val searchHistorySignal = Observable.just(listOf(fakeWeatherResponse))
+
+        SummaryViewModel(apiSignal, searchHistorySignal)
+            .getLocationName()
+            .subscribe(testObserver)
+
+        testObserver.assertValue("Hong Kong")
+        testObserver.assertComplete()
     }
 
     @Test
@@ -49,6 +82,21 @@ class SummaryViewModelTest {
             .subscribe(testObserver)
 
         testObserver.assertValue(", CN")
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
+    }
+
+    @Test
+    fun getCountryNameWhenApiNotReady() {
+        val testObserver = TestObserver<String>()
+        val apiSignal = Observable.empty<WeatherResponse>()
+        val searchHistorySignal = Observable.empty<List<WeatherResponse>>()
+
+        SummaryViewModel(apiSignal, searchHistorySignal)
+            .getCountryName()
+            .subscribe(testObserver)
+
+        testObserver.assertComplete()
     }
 
     @Test
@@ -62,6 +110,8 @@ class SummaryViewModelTest {
             .subscribe(testObserver)
 
         testObserver.assertValue("32.9°C")
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
     }
 
     @Test
@@ -88,6 +138,8 @@ class SummaryViewModelTest {
             .subscribe(testObserver)
 
         testObserver.assertValue("70.0%")
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
     }
 
     @Test
@@ -101,5 +153,7 @@ class SummaryViewModelTest {
             .subscribe(testObserver)
 
         testObserver.assertValue("10k")
+        testObserver.assertValueCount(1)
+        testObserver.assertComplete()
     }
 }
