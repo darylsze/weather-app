@@ -15,18 +15,9 @@ import kotlinx.android.synthetic.main.empty_weather_summary.*
 import org.jetbrains.anko.defaultSharedPreferences
 
 class SummaryViewModel(
-        private val apiSignal: Observable<WeatherResponse>,
-        private val searchHistorySignal: Observable<List<SearchHistory>>
+        val apiSignal: Observable<WeatherResponse>,
+        val searchHistorySignal: Observable<List<SearchHistory>>
 ) {
-    companion object {
-        fun of(
-            apiSignal: Observable<WeatherResponse>,
-            searchHistorySignal: BehaviorSubject<List<SearchHistory>>
-        ): SummaryViewModel {
-            return SummaryViewModel(apiSignal, searchHistorySignal)
-        }
-    }
-
     // https://openweathermap.org/weather-conditions
     private val weatherIconMapper = mapOf(
             "Clouds" to R.drawable.cloudy,

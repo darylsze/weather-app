@@ -42,7 +42,9 @@ class SummaryActivity : BaseActivity() {
     private val locationSignal = BehaviorSubject.create<String>()
 
     // track API response
-    private val apiSignal = BehaviorSubject.create<WeatherResponse>()
+    private val apiSignal by lazy {
+        BehaviorSubject.create<WeatherResponse>()
+    }
 
     // track GPS
     private val gpsSignal = BehaviorSubject.create<Pair<Double, Double>>()
@@ -51,13 +53,11 @@ class SummaryActivity : BaseActivity() {
         viewModel.getSearchHistories(this@SummaryActivity, gson)
     }
 
-    private val searchHistorySignal by lazy {
-        BehaviorSubject.createDefault<List<SearchHistory>>(previousSearchHistory)
-    }
+    private val searchHistorySignal = BehaviorSubject.create<List<SearchHistory>>()
 
     private val viewModel by lazy {
         // keep view model change based on API response
-        SummaryViewModel.of(apiSignal, searchHistorySignal)
+        SummaryViewModel(apiSignal, searchHistorySignal)
     }
 
 
@@ -70,9 +70,11 @@ class SummaryActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
         setupRecyclerView()
 
+        searchHistorySignal.onNext(previousSearchHistory)
+
         searchHistorySignal
             .doOnNext { rvSearchHistoryAdapter.setHistories(it) }
-            .subscribe()
+            .subscribe() addTo compositeDisposable
 
         // cancel any refresh state when no network worker is active
         apiSignal
@@ -165,7 +167,7 @@ class MyRvSearchResultAdapter(
         return SearchHistoryViewHolder(view)
     }
 
-    override fun getItemCount(): Int = dataset.size
+    override fun getItemCount(): Int = dataset.size - 1
 
     override fun onBindViewHolder(holder: SearchHistoryViewHolder, position: Int) {
         println(dataset[position])
